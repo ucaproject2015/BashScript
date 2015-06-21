@@ -1,0 +1,3 @@
+skip: 
+tmp: /tmp
+case: lower

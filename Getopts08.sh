@@ -1,20 +1,116 @@
 #!/bin/bash
 
-SKIPBLANKS=
-CASE=lower
+AYUDA=0
+PORCENTAJE=0
+DPROFUNDIDAD=0
+TMPDIR=
 
-gato=$#
-$1=$gato
+   while getopts :dhp: arg
+      do
+      case $arg in
+         d)   DPROFUNDIDAD=1 ;;
+         h)   if [ $# == 1 ]; then
+                 AYUDA=1
+              else
+                 echo "Opción -h no se puede combinar."
+                 logger -p error -t PROYECTO_IASGL Combinación inválida
+                 exit 1
+              fi ;;
+         p)   NUMERO=$(echo $OPTARG | egrep --only-matching '^[0-9]+')
+              if [ "$NUMERO" == 1 ]; then
+                 PORCENTAJE=$NUMERO
+              else
+                 echo "Sólo se admite -p1 (Seleccione -h para ver la ayuda)."
+                 logger -p error -t PROYECTO_IASGL Argumento inválido
+                 exit 1
+              fi
 
-echo "kokokoko $1"
+              OPCION=$(echo $OPTARG | egrep --only-matching 'd$')
+              if [ "$OPCION" == "d" ]; then
+                 DPROFUNDIDAD=1
+              fi ;;
+         :)   echo "Debe meter un argumento a la opción: -p1"
+              logger -p auth.error -t PROYECTO_IASGL Falta argumento opción -p
+              exit 1 ;;
+         \?)  echo "Opción inválida -$OPTARG ignorada."
+              logger -p auth.error -t PROYECTO_IASGL Opción inválida
+              exit 1 ;;
+      esac
+   done
+
+if [ $# == 0 ]; then
+   echo "Es necesario un directorio (Seleccione -h para ver la ayuda)."
+   logger -p error -t PROYECTO_IASGL Falta directorio
+   exit 1
+elif [ $# == 1 ]; then
+   TMPDIR=$1
+
+   if [ -d "$TMPDIR" ]; then
+      echo "*Mostrar todo normal*"
+      exit 0
+   elif [ "$AYUDA" == 1 ]; then
+      echo "*Mostrar sólo ayuda*"
+      exit 0
+   else
+      echo "Argumento NO es directorio."
+      logger -p error -t PROYECTO_IASGL Falta Argumento válido
+      exit 1
+   fi      
+elif [ $# == 2 ]; then
+   TMPDIR=$2
+
+elif [ $# == 3 ]; then
+   TMPDIR=$3
+
+else
+   echo "Cantidad argumentos inválida."
+   logger -p error -t PROYECTO_IASGL Cantidad argumentos inválida
+   exit 1
+fi
+
+#Verificación si meten parámetros#
+if [ -d "$TMPDIR" ]; then
+   if [ "$PORCENTAJE" == 1 -a "$DPROFUNDIDAD" == 1 ]; then
+      echo "*Mostrar porcentaje 1 y recursivo*"
+   elif [ "$PORCENTAJE" == 1 ]; then
+      echo "*Mostrar porcentaje 1*"
+   elif [ "$DPROFUNDIDAD" == 1 ]; then
+      echo "*Mostrar recursivo*"
+   else
+      echo "*Algo salió mal*"
+      logger -p error -t PROYECTO_IASGL Error desconocido
+      exit 1
+   fi   
+else
+   echo "Argumento NO es directorio."
+   logger -p error -t PROYECTO_IASGL Falta Argumento válido
+   exit 1
+fi
+
+echo "Cantidad: "$#
+echo "Ayuda: "$AYUDA
+echo "Porcentaje: "$PORCENTAJE
+echo "Profundidad: "$DPROFUNDIDAD
+echo "TMPDIR: "$TMPDIR
+
+exit 0
 
 
-if [ "$0"  == ./Getopts07.sh -a ! -d "$gato" ]; then
-	logger -p error -t GESTOR_ALARMAS Falta Argumento válido
-	echo "Missing dirname ("./Getopts07.sh --help" for help)"
 
 
-elif [ "$0"  == ./Getopts07.sh -a -d "$gato" ] ; then
+
+
+#gato=$#
+#$1=$gato
+
+#echo "kokokoko $1"
+
+#if [ "$0"  == ./Getopts08.sh -a ! -d "$gato" ]; then
+#	logger -p error -t GESTOR_ALARMAS Falta Argumento válido
+#	echo "Missing dirname ("./Getopts07.sh --help" for help)"
+
+
+if [ "$0"  == ./Getopts08.sh -a -d "$gato" ] ; then
 	TMPDIR=$gato
    echo ""
 	echo "El directorio que usted ingreso es: "$TMPDIR

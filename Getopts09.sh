@@ -1,22 +1,17 @@
 #!/bin/bash
 
-AYUDA=`grep "AYUDA" variables.sh | sed 's/AYUDA=\(.*\)/\1/g'`
-PORCENTAJE=`grep "PORCENTAJE" variables.sh | sed 's/PORCENTAJE=\(.*\)/\1/g'`
-DPROFUNDIDAD=`grep "DPROFUNDIDAD" variables.sh | sed 's/DPROFUNDIDAD=\(.*\)/\1/g'`
+AYUDA=0
+PORCENTAJE=0
+DPROFUNDIDAD=1
 TMPDIR=
-
-#echo "AAAAAAAAAAAAAAAA: "$DPROFUNDIDAD
 
 function AYUDA(){
    echo "*Mostrar sólo ayuda*"
 }
 
 function PROCESO(){
-   ArchivosReglaresT=`find ${TMPDIR} -maxdepth 1 -type f | egrep -c "*" 2>`
+   ArchivosReglaresT=`find ${TMPDIR} -maxdepth 1 -type f | egrep -c "*"`
       
-   #if [ ! $? == 0 ]; then
-   #fi
-
       #IMAGENES:
       sumaImagenes=`find ${TMPDIR} -maxdepth 1 -type f | grep -E -c "*\.(png|cdr|cpt|jpeg|jfif|ppt|pps|jpg|raw|psd|tiff|xcf|gif|eps|dng|psb|jp2|JPG)$"`
 
@@ -184,25 +179,12 @@ if [ $# == 0 ]; then
 elif [ $# == 1 ]; then
    TMPDIR=$1
 
-   if [ "$AYUDA" == 1 ]; then
+   if [ -d "$TMPDIR" ]; then
+      RECURSIVO
+      exit 0
+   elif [ "$AYUDA" == 1 ]; then
       AYUDA
       exit 0
-   elif [ -d "$TMPDIR" ]; then
-      if [ "$PORCENTAJE" == 1 ]; then
-         if [ "$DPROFUNDIDAD" == 1 ]; then
-            PORCENTAJE_RECURSIVO
-         else
-            PORCENTAJE
-         fi         
-      else
-         if [ "$DPROFUNDIDAD" == 1 ]; then
-            RECURSIVO
-         else
-            NORMAL
-         fi
-      fi
-
-      exit 0     
    else
       echo "Argumento NO es directorio."
       logger -p error -t PROYECTO_IASGL Falta Argumento válido
